@@ -3137,3 +3137,12 @@ by the YAML organization on `libyaml-rs`; same API, byte-identical output on the
 `unsafe-libyaml` left the lock file; the RUSTSEC-2024-0449 ignore left `deny.toml`. New tests:
 the example config file parses, and a golden test pins the YAML output text. CHANGELOG has a
 Security bullet.
+
+## 2026-10-16: release 0.11.0 (branch `chore/release-0.11.0`)
+
+Changelog promoted to `## [0.11.0] - 2026-10-16`, version bumped in the root manifest and the
+five internal pins, `#[deprecated(since)]` on `RetryConfig::backoff()` set to 0.11.0. Minor bump as a
+project choice: `atlassian-cli-api` gained public API (`delays()`, `RetryDelays`, `query` module)
+and a deprecation; commands and output formats unchanged, retry delays come from a new generator
+with the same policy. Plan and verification record:
+`docs/16102026_release_0_11_0_plan.md`.

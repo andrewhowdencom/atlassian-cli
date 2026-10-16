@@ -11,6 +11,25 @@ resolve. `git log` remains the complete record.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-10-16
+
+A dependency release. Commands, output formats and the TLS backend are
+unchanged. Retry delays now come from the crate's own generator: the same
+policy, with arithmetic that can differ from the old `backoff` crate by a
+nanosecond. The `atlassian-cli-api` library gains `RetryConfig::delays()` and
+the `query` module and deprecates `RetryConfig::backoff()`. The workspace sheds
+the unused rustls stack, the deprecated `serde_yaml`, `urlencoding` and nine
+unused declarations. The `aarch64-apple-darwin` release binary measured 25.2 MB
+before this work and 21.9 MB after the TLS change.
+
+### Added
+
+- `RetryConfig::delays()` and `RetryDelays` in `atlassian-cli-api`: the
+  exponential delay generator the client uses between attempts. (#165)
+- `query::encode_query_component` in `atlassian-cli-api`: percent-encodes a
+  query string key or value with the RFC 3986 unreserved set, the same output
+  the removed `urlencoding` crate produced. (#166)
+
 ### Deprecated
 
 - `RetryConfig::backoff()` in `atlassian-cli-api` is deprecated. Use
@@ -534,7 +553,8 @@ in scripts.
 First release: a Rust CLI for Jira, Confluence and Bitbucket, distributed through
 cargo-dist with a Homebrew tap and a shell installer.
 
-[Unreleased]: https://github.com/omar16100/atlassian-cli/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/omar16100/atlassian-cli/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/omar16100/atlassian-cli/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/omar16100/atlassian-cli/compare/v0.9.3...v0.10.0
 [0.9.3]: https://github.com/omar16100/atlassian-cli/compare/v0.9.2...v0.9.3
 [0.9.2]: https://github.com/omar16100/atlassian-cli/compare/v0.9.1...v0.9.2
