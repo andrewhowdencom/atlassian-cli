@@ -3147,3 +3147,28 @@ and a deprecation; commands and output formats unchanged, retry delays come from
 with the same policy. Shipped: tag `v0.11.0` on `ca97cc3`, release with 14 assets, six crates on crates.io, Homebrew
 formula at 0.11.0, downloaded macOS artifact verified by checksum and `--version`. Record:
 `docs/16102026_release_0_11_0_plan.md`.
+
+## 2026-10-16: Jira comment visibility (branch `feat/jira-comment-visibility-2`, from PR #158 by Kim Kennof)
+
+### The gap
+`jira issue comments add` built its payload as `json!({ "body": markdown_to_adf(body) })`, body
+and nothing else. Jira treats a comment with no `visibility` property as unrestricted, so every
+comment the CLI wrote was readable by everyone who could see the issue. The Jira web UI offers the
+restriction next to the Save button; a workflow moved into the CLI silently lost it (issue #157).
+
+### The change
+`crates/cli/src/commands/jira/issues.rs`: `CommentVisibility` (`Role` or `Group`), the pure helpers
+`visibility_value()`, `comment_payload()` and `existing_visibility()`, and `VisibilityChange`
+(`Keep`, `Set`, `Public`) for updates. `add_comment()` sends `visibility` only when a flag is set.
+`update_comment()` reads the comment first when no flag is given and sends its current restriction
+back, because Jira replaces visibility on every update; `--visibility-public` is the only way to
+remove a restriction, and `--visibility-role` or `--visibility-group` set one without the read.
+`crates/cli/src/commands/jira/mod.rs`: the flags on `comments add` and `comments update`, mutually
+exclusive through clap, mapped by `comment_visibility()` and `comment_visibility_change()`.
+
+### Tests
+Unit tests for the helpers, clap parser tests for the flag conflicts on both subcommands, and
+wiremock tests for the POST and PUT bodies: unrestricted, role, group, restriction kept on update,
+public comment stays public, `--visibility-public` removes, set without reading, and no PUT when
+the read fails. `issues.rs` is over the 2000 line guideline (it was before this change); moving the
+comment operations to `jira/comments.rs` is a follow-up.

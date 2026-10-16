@@ -11,6 +11,18 @@ resolve. `git log` remains the complete record.
 
 ## [Unreleased]
 
+### Added
+
+- `jira issue comments add` and `jira issue comments update` take
+  `--visibility-role <ROLE>` or `--visibility-group <GROUP>`, which restrict the
+  comment to a project role or a group. `add` without a flag is unchanged: Jira
+  publishes the comment to everyone who can see the issue. `update` without a
+  flag now reads the comment first and keeps its current restriction, because
+  Jira replaces visibility on every update; before, editing a restricted comment
+  through the CLI republished it. `update --visibility-public` removes a
+  restriction. The flags are mutually exclusive. Reported and first implemented
+  by Kim Kennof. (#157, #170)
+
 ## [0.11.0] - 2026-10-16
 
 A dependency release. Commands, output formats and the TLS backend are
