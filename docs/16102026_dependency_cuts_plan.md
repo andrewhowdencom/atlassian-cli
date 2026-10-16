@@ -1,6 +1,6 @@
 # Dependency cuts, 16 Oct 2026
 
-Status: PR 1 (findings 2, 4, 6 and the `backoff` feature) implemented on branch `chore/dependency-cuts-1`, 16 Oct 2026; PRs 2 to 5 not started. Measured on `main` at `1301e23` plus the rustls 0.23.46 bump
+Status: PR 1 (findings 2, 4, 6 and the `backoff` feature) is PR #162. PR 2 (finding 1, option A) is on branch `chore/dependency-cuts-2-tls`, stacked on PR 1, 16 Oct 2026. PRs 3 to 5 not started. Measured on `main` at `1301e23` plus the rustls 0.23.46 bump
 from PR #160. Reviewed by Codex on 16 Oct 2026
 (`/Users/macmini/projects/codex/atlassian_cli_dependency_cuts_16oct2026.txt`); its
 corrections are folded in and marked **[codex]**.
@@ -208,6 +208,24 @@ Gone from the lock file: `async-trait`, `async-stream`, `async-stream-impl`,
 stays listed in `Cargo.lock` because the lock file records optional dependencies, but no
 target compiles it (`cargo tree -i password-hash --target all` finds no dependents).
 `futures` (the umbrella) left the release graph; it stays in dev builds through wiremock.
+
+## PR 2 result (16 Oct 2026, option A)
+
+`reqwest` with `default-features = false` and `charset, http2, system-proxy, json, multipart,
+native-tls-vendored`. `stream` dropped. The three licence allowances left `deny.toml`.
+
+| Metric (macOS normal graph) | After PR 1 | After PR 2 |
+| --- | --- | --- |
+| `Cargo.lock` packages | 386 | 349 |
+| Binary graph, distinct packages | 227 | 218 |
+| Release binary bytes | 25139232 | 21916672 (12.8% smaller) |
+
+`cargo tree -i` finds no dependents for `rustls`, `hyper-rustls`, `tokio-rustls`,
+`rustls-webpki`, `rustls-platform-verifier`, `aws-lc-rs`, `aws-lc-sys` and `webpki-root-certs`
+on any target. `rustls-pki-types` stays, as predicted. The four release targets were built on the PR with a temporary
+`pr-run-mode = "upload"` plus `cache-builds = false` in `dist-workspace.toml` (Release run
+38847415620: all four `build-local-artifacts` jobs green, `host`, `announce` and
+`publish-homebrew-formula` skipped). Both settings were removed again before merge. Live tenant test on macOS (aarch64) with the release binary: `jira api /rest/api/3/serverInfo` returned the tenant's server info over HTTPS, so the native-tls handshake and system trust store work; `auth test` returned 401 because the stored token is expired (a pre-existing blocker on this Mac, 28 Sep 2026). Linux live test: the `x86_64-unknown-linux-musl` artifact from that run, executed in an `alpine:3.20` container (amd64), returned the same server info over HTTPS, and `auth test` returned the same 401. Vendored OpenSSL with the container's CA bundle works.
 
 ## Verification
 
